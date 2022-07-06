@@ -127,7 +127,7 @@ jobs:
           keys: [backend-scan]
       - run:
           name: Check backend against netwrok vulnerabilities
-          command:
+          command: |
             cd backend
             npm install
             npm audit --audit-level=critical
