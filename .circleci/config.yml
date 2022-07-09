@@ -274,10 +274,11 @@ jobs:
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive   
       # Here's where you will add some code to rollback on failure    
       - destroy-environment:
-          circle_workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"  
-      - revert-migrations: 
-          id: "${CIRCLE_WORKFLOW_ID:0:7}"   
+          id: "${CIRCLE_WORKFLOW_ID:0:7}"  
           when: on_fail
+      - revert-migrations: 
+          circle_workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"   
+          
                     
   deploy-backend:
     docker:
