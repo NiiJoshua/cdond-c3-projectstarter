@@ -206,25 +206,30 @@ jobs:
 
   run-migrations:
     docker:
-      - image: circleci/node:13.8.0
+      - image: python:3.10-alpine3.16
     steps:
       - checkout
       - restore_cache:
           keys: [buckend-build]
       - run:
+          name: Install dependencies
+          command: |
+            apk add --update tar gzip curl nodejs npm openssh-client git
+            pip install awscli
+            aws --version
+      - run:
           name: Run migrations
           command: |
-            cd backend
+            cd backend/src
             npm install
             npm run migrations > migrations_dump.txt
       - run:
-          name: Send migration results to memstash
+          name: Send migration results to kvdb.io
           command: |
             if grep -q "has been successfully executed." ~/project/backend/migrations_dump.txt
             then
                 curl https://kvdb.io/BiCtDR2bQWKpqsGqmwVWtt/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
             fi     
-     # Here's where you will add some code to rollback on failure 
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
@@ -387,8 +392,8 @@ workflows:
               only: master
       - configure-infrastructure:
           requires: [deploy-infrastructure]
-      # - run-migrations:
-      #     requires: [configure-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
       # - deploy-frontend:
       #     requires: [run-migrations]
       # - deploy-backend:
