@@ -241,7 +241,7 @@ jobs:
       - image: python:3.10-alpine3.16
     steps:
       - checkout
-      - attach_worspace:
+      - attach_workspace:
           at: ~/
       - restore_cache:
           keys: [frontend-build]
