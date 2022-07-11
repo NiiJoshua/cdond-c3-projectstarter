@@ -13,9 +13,14 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
-            aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
-            aws s3 rm s3://udapeople-kobivina990
+            # aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
+            # aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
+            # aws s3 rm s3://udapeople-kobivina990
+
+            echo "Destroying environment: << parameters.circle_workflow_id >> "
+            aws s3 rm s3://udapeople-<< parameters.circle_workflow_id >> --recursive
+            aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.circle_workflow_id >>
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.circle_workflow_id >>
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -66,7 +71,6 @@ jobs:
       - run:
           name: Back-end build
           command: |
-             # Your code here
              cd backend
              npm install
              npm run build
@@ -95,13 +99,16 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-test]
+          keys: [backend-build]
       - run:
-          name: Run backend test
+          name: Back-end build
           command: |
             cd backend
             npm install
             npm run test
+      - save_cache:
+          paths: [backend/node_modules]
+          key: backend-test
             
   scan-frontend:
     docker:
@@ -118,6 +125,17 @@ jobs:
             # npm install oauth-sign@^0.9.0
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical 
+         # below added
+      - save_cache:
+          paths: [frontend/node_modules]
+          key: frontend-build
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      # When there is a successful deployment, send a notification with a different template1.
+      - slack/notify:
+          event: pass
+          template: basic_success_1
 
   scan-backend:
     docker:
@@ -125,7 +143,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-scan]
+          keys: [backend-buld]
       - run:
           name: Check backend against netwrok vulnerabilities
           command: |
@@ -135,7 +153,18 @@ jobs:
             npm audit fix --audit-level=critical --force
             npm audit fix --force 
             npm audit --audit-level=critical
-
+       # below added     
+      - save_cache:
+          paths: [backend/node_modules]
+          key: backend-build
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      # When there is a successful deployment, send a notification with a different template1.
+      - slack/notify:
+          event: pass
+          template: basic_success_1
+          
   deploy-infrastructure:
     docker:
       - image: amazon/aws-cli
