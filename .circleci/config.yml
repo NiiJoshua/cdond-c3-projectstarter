@@ -321,48 +321,41 @@ jobs:
                     
   deploy-backend:
     docker:
-      - image: amazon/aws-cli
+      - image: python:3.10-alpine3.16 
     steps:
       - checkout
       - add_ssh_keys:
           fingerprints: ["7f:e0:80:9a:cc:d8:47:2f:38:f5:49:e4:65:be:d4:66"]
-
+      - attach_workspace:
+          at: ~/
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: Install dependencies
           command: |
-            yum update -y
-            yum install -y tar gzip
-            curl -sL https://rpm.nodesource.com/setup_13.x | bash -
-            yum install -y nodejs
-            amazon-linux-extras install -y epel
-            yum install -y ansible
-            
-      - attach_workspace:
-          at: ~/
-      # - restore_cache:
-      #     keys: [backend-build]
-      
+            apk add --update ansible tar gzip curl nodejs npm openssh-client git
+            pip install awscli
+            aws --version
       - run:
           name: Deploy backend
           command: |
             cd backend
-            npm install
+            npm i
             npm run build
             cd ..
             # Zip the directory
             tar -C backend -czvf artifact.tar.gz .
-            # pwd
-            # mkdir .circleci/ansible/roles/deploy/files/
-            # mv artifact.tar.gz .circleci/ansible/roles/deploy/files/
-            # ls -lh 
+            pwd
+            mkdir .circleci/ansible/roles/deploy/files/
+            mv artifact.tar.gz .circleci/ansible/roles/deploy/files/
+            ls -lh                            
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
-            cat inventory.txt
-            # ls -l ~/project/
+            cat inventory.txt   
             ansible-playbook -i inventory.txt deploy-backend.yml
-      # - save_cache:
-      #     paths: [backend/node_modules]
-      #     key: backend-build
+      - save_cache:
+          paths: [backend/node_modules]
+          key: backend-build
       - destroy-environment:
           id: "${CIRCLE_WORKFLOW_ID:0:7}"   
           when: on_fail
