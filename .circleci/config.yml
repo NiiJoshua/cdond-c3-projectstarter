@@ -131,9 +131,9 @@ jobs:
           event: fail
           template: basic_fail_1
       # When there is a successful deployment, send a notification with a different template1.
-      - slack/notify:
-          event: pass
-          template: basic_success_1
+      # - slack/notify:
+      #     event: pass
+      #     template: basic_success_1
 
   scan-backend:
     docker:
@@ -159,9 +159,9 @@ jobs:
           event: fail
           template: basic_fail_1
       # When there is a successful deployment, send a notification with a different template1.
-      - slack/notify:
-          event: pass
-          template: basic_success_1
+      # - slack/notify:
+      #     event: pass
+      #     template: basic_success_1
           
   deploy-infrastructure:
     docker:
