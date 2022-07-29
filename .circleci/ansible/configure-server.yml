@@ -12,16 +12,16 @@
     - ansible_host_key_checking: false
     - ansible_stdout_callback: yaml
 
-  # pre_tasks:
-  #   - name: "wait 600 seconds for target connection to become reachable/usable."
-  #     command: sleep 120
+  pre_tasks:
+    - name: "wait 600 seconds for target connection to become reachable/usable."
+      command: sleep 120
 
-    - name: "install python for Ansible."
-      command: |
-        python 3.10 install
-        nodejs install
-        npm install
-        pm2 install
+#     - name: "install python for Ansible."
+#       command: |
+#         python 3.10 install
+#         nodejs install
+#         npm install
+#         pm2 install
 
 
   # Get the environment variables from CircleCI and add to the EC2 instance
