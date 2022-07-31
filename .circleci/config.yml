@@ -449,11 +449,11 @@ jobs:
             else
               echo --------- Cleanup failed ------------
             fi
-      # - destroy-environment:
-      #     id: "${CIRCLE_WORKFLOW_ID:0:7}"  
-      #     when: on_fail
-      # - revert-migrations: 
-      #     circle_workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
+      - destroy-environment:
+          id: "${CIRCLE_WORKFLOW_ID:0:7}"  
+          when: on_fail
+      - revert-migrations: 
+          circle_workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}" 
             
 
 workflows:
